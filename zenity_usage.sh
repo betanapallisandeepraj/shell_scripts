@@ -32,6 +32,8 @@ echo $var
 
 var=$(zenity --info --width=400 --height=200 --text "This is a notification!")
 echo $var
+var=$(zenity --info --timeout 3 --width=400 --height=200 --text "This is a notification!")
+echo $var
 var=$(zenity --warning --width=400 --height=200 --text "This is a warning!")
 echo $var
 var=$(zenity --error --width=400 --height=200 --text "This is an error!")
@@ -72,3 +74,4 @@ var=$()
 echo $var
 var=$()
 echo $var
+
