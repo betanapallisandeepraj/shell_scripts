@@ -60,6 +60,8 @@ fes_radio_mode=(mesh wds_ap)
 
 wifi_radio_2band_chanl=(1 2 3 4 5 6 7 8 9 10 11 12 13 14)
 wifi_radio_5band_chanl=(32 36 40 44 48 52 56 60 64 100 104 108 112 116 120 124 128 132 136 140 149 153 157 161 165 169 173 177)
+wifi_radio_all_chanl=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 32 36 40 44 48 52 56 60 64 100 104 108 112 116 120 124 128 132 136 140 149 153 157 161 165 169 173 177)
+# wifi_radio_all_chanl=(52 56 60 64 100 104 108 112 116 120 124 128 132 136 140 149 153 157 161 165 169 173 177)
 wifi_radio_bw=(3 5 10 15 0 26)
 # wifi_radio_mode=(none ap_no_fes)
 wifi_radio_mode=(none)
@@ -86,39 +88,61 @@ echo -n "" >/tmp/log_3.txt
 echo -n "" >/tmp/log_4.txt
 for wifi_mode in "${wifi_radio_mode[@]}"; do
     echo -e "$wifi_mode"
-    for fes_mode in "${fes_radio_mode[@]}"; do
-        echo -e "\t$fes_mode"
-        $ssh_cmd "/usr/share/simpleconfig/setup.sh $fes_mode none 2> /dev/null > /dev/null"
-        sleep 1
-        for band in "${submodel[@]}"; do
-            echo -e "\t\t$band"
-            for chan_list_name in "${fes_radio_chanl[@]}"; do
-                band_base=$(echo $band | awk -F - '{print $2}')
-                if [ $(echo $chan_list_name | grep $band_base) ]; then
-                    echo -e "\t\t\t$chan_list_name"
-                    array_name="$chan_list_name[@]"
-                    array=("${!array_name}")
-                    echo -e "\t\t\t${array[@]}"
-                    for chan in "${array[@]}"; do
-                        echo -e "\t\t\t$chan"
-                        for bw_list_name in "${fes_radio_bw[@]}"; do
-                            if [ $(echo $bw_list_name | grep $band_base) ]; then
-                                echo -e "\t\t\t\t$bw_list_name"
-                                array_name="$bw_list_name[@]"
-                                array=("${!array_name}")
-                                echo -e "\t\t\t\t${array[@]}"
-                                for bw in "${array[@]}"; do
-                                    echo -e "\t\t\t\t$bw"
-                                    echo "$wifi_mode,$fes_mode,$band,$chan,$bw" >>/tmp/log_1.txt
-                                    change_band_chan_bw $wifi_mode $fes_mode $band $chan $bw
-                                    sleep 0.1
-                                done
-                            fi
+    for wifi_chan in "${wifi_radio_all_chanl[@]}"; do
+        # echo -e "\t$wifi_chan"
+        if [ "$wifi_chan" -le "14" ]; then
+            echo -e "\t$wifi_chan"
+            # For 2.4G
+            $ssh_cmd "uci set wireless.radio1.hwmode=11g"
+            $ssh_cmd "uci set wireless.radio1.channel=$wifi_chan"
+            $ssh_cmd "uci commit"
+            $ssh_cmd "/etc/init.d/network restart"
+            sleep 10
+        else
+            echo -e "\t$wifi_chan"
+            # For 5G
+            $ssh_cmd "uci set wireless.radio1.hwmode=11a"
+            $ssh_cmd "uci set wireless.radio1.channel=$wifi_chan"
+            $ssh_cmd "uci commit"
+            $ssh_cmd "/etc/init.d/network restart"
+            sleep 120
+        fi
+        $ssh_cmd "iw wlan1 info | head -8 | tail -1"
+        for fes_mode in "${fes_radio_mode[@]}"; do
+            echo -e "\t$fes_mode"
+            $ssh_cmd "/usr/share/simpleconfig/setup.sh $fes_mode none 2> /dev/null > /dev/null"
+            sleep 1
+            for band in "${submodel[@]}"; do
+                echo -e "\t\t$band"
+                for chan_list_name in "${fes_radio_chanl[@]}"; do
+                    band_base=$(echo $band | awk -F - '{print $2}')
+                    if [ $(echo $chan_list_name | grep $band_base) ]; then
+                        echo -e "\t\t\t$chan_list_name"
+                        array_name="$chan_list_name[@]"
+                        array=("${!array_name}")
+                        echo -e "\t\t\t${array[@]}"
+                        for chan in "${array[@]}"; do
+                            echo -e "\t\t\t$chan"
+                            for bw_list_name in "${fes_radio_bw[@]}"; do
+                                if [ $(echo $bw_list_name | grep $band_base) ]; then
+                                    echo -e "\t\t\t\t$bw_list_name"
+                                    array_name="$bw_list_name[@]"
+                                    array=("${!array_name}")
+                                    echo -e "\t\t\t\t${array[@]}"
+                                    for bw in "${array[@]}"; do
+                                        echo -e "\t\t\t\t$bw"
+                                        echo "$wifi_mode,$fes_mode,$band,$chan,$bw" >>/tmp/log_1.txt
+                                        change_band_chan_bw $wifi_mode $fes_mode $band $chan $bw
+                                        sleep 0.1
+                                    done
+                                fi
+                                sleep 0.1
+                            done
                             sleep 0.1
                         done
-                        sleep 0.1
-                    done
-                fi
+                    fi
+                    sleep 0.1
+                done
                 sleep 0.1
             done
             sleep 0.1

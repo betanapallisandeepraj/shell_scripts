@@ -15,10 +15,10 @@ function show_progress() {
 
     # Create the progress bar string
     local bar="["
-    for ((i=0; i<filled_slots; i++)); do
+    for ((i = 0; i < filled_slots; i++)); do
         bar+="="
     done
-    for ((i=0; i<empty_slots; i++)); do
+    for ((i = 0; i < empty_slots; i++)); do
         bar+=" "
     done
     bar+="]"
@@ -32,7 +32,7 @@ total_steps=50
 
 echo "Starting the task..."
 
-for ((step=1; step<=total_steps; step++)); do
+for ((step = 1; step <= total_steps; step++)); do
     # Perform the task for each step
 
     # Update and display the progress bar

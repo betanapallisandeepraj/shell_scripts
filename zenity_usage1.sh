@@ -4,7 +4,7 @@
 #var=$?
 #echo $var
 #if zenity --question --text="Do you want to answer stupid questions?"
-#then 
+#then
 #    zenity --entry --text="Why?"
 #fi
 

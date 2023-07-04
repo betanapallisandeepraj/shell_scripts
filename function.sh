@@ -2,4 +2,4 @@
 abc() {
 	echo "Starting of $FUNCNAME"
 }
-abc 123 
+abc 123

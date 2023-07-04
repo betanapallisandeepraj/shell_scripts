@@ -1,4 +1,4 @@
-#!/bin/bash       
+#!/bin/bash
 
 function log() {
 
@@ -7,9 +7,5 @@ function log() {
     echo "BASH_LINENO: ${BASH_LINENO[0]}"
     echo "BASH_LINENO: ${BASH_LINENO[*]}"
 }
-
-
-
-
 
 log

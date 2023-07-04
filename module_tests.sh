@@ -14,7 +14,7 @@
 runtime_start=$(date +%s.%N)
 
 default_target_ip="10.223.80.106"
-client_ip="10.223.62.113"	#make sure client also in same channel and bandwidth, 
+client_ip="10.223.62.113" #make sure client also in same channel and bandwidth,
 default_mode="mesh"
 default_channel=7
 default_bandwidth=10
@@ -27,8 +27,6 @@ ssh_silent_cmd="ssh -q -o StrictHostKeyChecking=no root@$default_target_ip"
 model=$($ssh_silent_cmd "fes_model.sh get")
 echo "Module test begin for $model"
 
-
-
 is_wearable=$($ssh_silent_cmd "sr_personality -w")
 if [[ $is_wearable == "true" ]]; then
 	interface="wlan1"
@@ -37,7 +35,7 @@ else
 	interface="wlan0"
 fi
 
-show_sleep(){
+show_sleep() {
 	secs=$(($1))
 	while [ $secs -gt 0 ]; do
 		echo -ne "$secs\033[0K\r"
@@ -50,12 +48,11 @@ show_sleep(){
 # Usage: response_check $default_target_ip "50"
 response_check() {
 	ip=$1
-	wait_time=$2	# waiting time in seconds.
+	wait_time=$2 # waiting time in seconds.
 	echo "waiting for maximum of $wait_time seconds until response of $ip:"
-	for (( c=1; c<=$wait_time; c++ ))
-	do
+	for ((c = 1; c <= $wait_time; c++)); do
 		resp=$(ping -c 1 -i 1 -w 1 $ip | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-		if [[ $resp  != "time" ]]; then
+		if [[ $resp != "time" ]]; then
 			echo -ne "$c/$wait_time\r"
 		else
 			time="$c"
@@ -71,16 +68,15 @@ response_check() {
 response_check_client() {
 	ip=$1
 	cli_ip=$2
-	wait_time=$3	# waiting time in seconds.
+	wait_time=$3 # waiting time in seconds.
 	response_check $ip $wait_time
-	if [[ $?  == 0 ]]; then
+	if [[ $? == 0 ]]; then
 		return 0
 	fi
 	echo "waiting for maximum of $wait_time seconds until response of $cli_ip:"
-	for (( c=1; c<=$wait_time; c++ ))
-	do
+	for ((c = 1; c <= $wait_time; c++)); do
 		resp=$(ssh -q -o StrictHostKeyChecking=no root@$ip "ping -c 1 -i 1 -w 1 $cli_ip" | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-		if [[ $resp  != "time" ]]; then
+		if [[ $resp != "time" ]]; then
 			echo -ne "$c/$wait_time\r"
 		else
 			time="$c"
@@ -102,22 +98,22 @@ find_keyword() {
 	echo "Finding keyword=$2 in page=$1"
 	$get_cookie_cmd $page
 	echo "got cookies for page $page"
-	$get_page_cmd $page > /tmp/temp_page.txt
+	$get_page_cmd $page >/tmp/temp_page.txt
 	echo "page downloaded to /tmp/temp_page.txt"
 	# grep returns 0 if keyword found, 1 if not found, 2 on error.
-	grep $keyword /tmp/temp_page.txt		
+	grep $keyword /tmp/temp_page.txt
 	ret=$?
 	#cleaning the files
 	rm /tmp/cookies.txt /tmp/temp_page.txt
 	echo "sending return value $ret"
-	if [[ $ret  == 0 ]]; then
+	if [[ $ret == 0 ]]; then
 		return 1
-	else 
+	else
 		return 0
 	fi
 }
 
-# Function to check the default mode presence, before starting the test. 
+# Function to check the default mode presence, before starting the test.
 # arguments= no arguments
 check_defaults() {
 	#echo "checking for mode=$default_mode,channel=$default_channel,bandwidth=$default_bandwidth"
@@ -343,16 +339,16 @@ TEST_00010() {
 	STR="${STR//$'%'/ }"
 	#echo $STR
 
-	echo $STR > /tmp/word_count.txt
+	echo $STR >/tmp/word_count.txt
 	char_count=$(wc -c /tmp/word_count.txt | awk '{print $1}')
 	#echo "characters=$char_count"
 	new_line_count=$(wc -l /tmp/word_count.txt | awk '{print $1}')
 	#echo "newline_characters=$new_line_count"
 	word_count=$(wc -w /tmp/word_count.txt | awk '{print $1}')
 	#echo "words=$word_count"
-	space_count=$((word_count-1))
+	space_count=$((word_count - 1))
 	#echo "space_count=$space_count"
-	temp=$((word_count+space_count+new_line_count))
+	temp=$((word_count + space_count + new_line_count))
 	#echo $temp
 	rm /tmp/word_count.txt
 	echo "End of $FUNCNAME"
@@ -369,7 +365,7 @@ TEST_00011() {
 	if [[ $? == 0 ]]; then
 		return 0
 	fi
-	used_memory=$($ssh_silent_cmd  "free" | awk '{print $3}' | head -2 | tail -n 1)
+	used_memory=$($ssh_silent_cmd "free" | awk '{print $3}' | head -2 | tail -n 1)
 	#echo $used_memory
 	threshold_used_memory="32000"
 	#echo $threshold_used_memory
@@ -379,7 +375,7 @@ TEST_00011() {
 	else
 		return 0
 	fi
-	
+
 }
 
 TEST_00012() {
@@ -532,7 +528,6 @@ TEST_00014() {
 	return 1
 }
 
-
 TEST_00015() {
 	echo "Starting of $FUNCNAME"
 	check_defaults
@@ -585,13 +580,13 @@ TEST_00016() {
 	#echo $new_bandwidth
 
 	if [[ $new_bandwidth == $test_bandwidth ]]; then
-			echo "------------------------------------------------------"
-			echo -e "\t$FUNCNAME\t\t==>\tPASS"
-			echo "------------------------------------------------------"
+		echo "------------------------------------------------------"
+		echo -e "\t$FUNCNAME\t\t==>\tPASS"
+		echo "------------------------------------------------------"
 	else
-			echo "------------------------------------------------------"
-			echo -e "$FUNCNAME\t\t==>\tFAIL"
-			echo "------------------------------------------------------"
+		echo "------------------------------------------------------"
+		echo -e "$FUNCNAME\t\t==>\tFAIL"
+		echo "------------------------------------------------------"
 	fi
 	echo "setting to default_mode=$default_mode"
 	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode"
@@ -618,45 +613,45 @@ TEST_00017() {
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	channel=15     #Channel 15 is 912MHz
-	bandwidth=20   #20MHz
-	threshold_bitrate=5     # Mbits/sec
+	channel=15          #Channel 15 is 912MHz
+	bandwidth=20        #20MHz
+	threshold_bitrate=5 # Mbits/sec
 	mode="mesh"
 	client_mode="mesh"
 	server_ip=$($ssh_silent_cmd "ifconfig br-wan" | awk '{print $2}' | head -n 2 | tail -1 | awk -F : '{print $2}')
-	echo "echo \"setting $client_mode mode\"" > /tmp/temp.cmd
-	echo "/usr/share/simpleconfig/setup.sh $client_mode" >> /tmp/temp.cmd
-	echo "echo \"waiting for 60 seconds\"" >> /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
-	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.channel=$channel" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.chanbw=$bandwidth" >> /tmp/temp.cmd
-	echo "uci commit" >> /tmp/temp.cmd
-	echo "wifi" >> /tmp/temp.cmd
-	echo "sleep 10" >> /tmp/temp.cmd
+	echo "echo \"setting $client_mode mode\"" >/tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $client_mode" >>/tmp/temp.cmd
+	echo "echo \"waiting for 60 seconds\"" >>/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
+	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.channel=$channel" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.chanbw=$bandwidth" >>/tmp/temp.cmd
+	echo "uci commit" >>/tmp/temp.cmd
+	echo "wifi" >>/tmp/temp.cmd
+	echo "sleep 10" >>/tmp/temp.cmd
 	chmod 777 /tmp/temp.cmd
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	
+
 	response_check_client $default_target_ip $client_ip "10"
 	ret=$?
 	if [[ $ret == 0 ]]; then
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	
+
 	echo "setting $client_mode mode in $client_ip"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 	echo "setting $mode mode in $server_ip"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" >/dev/null
 	show_sleep 60
 	$ssh_silent_cmd "uci set wireless.radio0.channel=$channel"
 	$ssh_silent_cmd "uci set wireless.radio0.chanbw=$bandwidth"
 	$ssh_silent_cmd "uci commit wireless"
 	$ssh_silent_cmd "wifi"
 	show_sleep 30
-	
+
 	echo -e "iperf3 server ip is $server_ip"
 	$ssh_silent_cmd "iperf3 -s -D"
 	show_sleep 2
@@ -672,27 +667,27 @@ TEST_00017() {
 	$ssh_silent_cmd "kill -9 \`pidof iperf3\`"
 	show_sleep 2
 	#echo $iperf3_output
-	sender_bitrate=$(echo $iperf3_output | awk '{print $1}')	# In Mbits/sec
+	sender_bitrate=$(echo $iperf3_output | awk '{print $1}') # In Mbits/sec
 	echo -e "Sender Bit rate \t=\t$sender_bitrate Mbits/sec"
-	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}')	# In Mbits/sec
+	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}') # In Mbits/sec
 	echo -e "Receiver Bit rate\t=\t$receiver_bitrate Mbits/sec"
 	receiver_bitrate=$(echo $receiver_bitrate | awk -F . '{print $1}')
-	
+
 	#setting to default mode in target client
-	echo "/usr/share/simpleconfig/setup.sh $default_mode" > /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $default_mode" >/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 
 	#setting to default mode in target server
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" >/dev/null
 	show_sleep 60
 
 	#cleaning in ubuntu host, target server and client
-	rm /tmp/temp.cmd #/tmp/temp1.cmd
-	$ssh_silent_cmd "rm /tmp/temp.cmd" # /tmp/temp1.cmd"
+	rm /tmp/temp.cmd                                         #/tmp/temp1.cmd
+	$ssh_silent_cmd "rm /tmp/temp.cmd"                       # /tmp/temp1.cmd"
 	$ssh_silent_cmd "ssh root@$client_ip "rm /tmp/temp.cmd"" # /tmp/temp1.cmd""
 	echo "End of $FUNCNAME"
 	if [ "$receiver_bitrate" -ge "$threshold_bitrate" ]; then
@@ -714,41 +709,41 @@ TEST_00018() {
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	channel=15     #Channel 15 is 912MHz
-	bandwidth=20   #20MHz
-	threshold_bitrate=5     # Mbits/sec
+	channel=15          #Channel 15 is 912MHz
+	bandwidth=20        #20MHz
+	threshold_bitrate=5 # Mbits/sec
 	mode="wds_ap"
 	client_mode="wds_client"
 	server_ip=$($ssh_silent_cmd "ifconfig br-wan" | awk '{print $2}' | head -n 2 | tail -1 | awk -F : '{print $2}')
-	echo "echo \"setting $client_mode mode\"" > /tmp/temp.cmd
-	echo "/usr/share/simpleconfig/setup.sh $client_mode" >> /tmp/temp.cmd
-	echo "echo \"waiting for 60 seconds\"" >> /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
-	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.channel=$channel" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.chanbw=$bandwidth" >> /tmp/temp.cmd
-	echo "uci commit" >> /tmp/temp.cmd
-	echo "wifi" >> /tmp/temp.cmd
-	echo "sleep 10" >> /tmp/temp.cmd
+	echo "echo \"setting $client_mode mode\"" >/tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $client_mode" >>/tmp/temp.cmd
+	echo "echo \"waiting for 60 seconds\"" >>/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
+	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.channel=$channel" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.chanbw=$bandwidth" >>/tmp/temp.cmd
+	echo "uci commit" >>/tmp/temp.cmd
+	echo "wifi" >>/tmp/temp.cmd
+	echo "sleep 10" >>/tmp/temp.cmd
 	#echo "/tmp/temp.cmd &" > /tmp/temp1.cmd
 	chmod 777 /tmp/temp.cmd #/tmp/temp1.cmd
 	#scp /tmp/temp.cmd /tmp/temp1.cmd root@$default_target_ip:/tmp/
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	#$ssh_silent_cmd "scp /tmp/temp.cmd /tmp/temp1.cmd root@$client_ip:/tmp/"
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	
+
 	echo "setting $client_mode mode in $client_ip"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 	echo "setting $mode mode in $server_ip"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" >/dev/null
 	show_sleep 60
 	$ssh_silent_cmd "uci set wireless.radio0.channel=$channel"
 	$ssh_silent_cmd "uci set wireless.radio0.chanbw=$bandwidth"
 	$ssh_silent_cmd "uci commit wireless"
 	$ssh_silent_cmd "wifi"
 	show_sleep 30
-	
+
 	echo -e "iperf3 server ip is $server_ip"
 	$ssh_silent_cmd "iperf3 -s -D"
 	show_sleep 2
@@ -764,27 +759,27 @@ TEST_00018() {
 	$ssh_silent_cmd "kill -9 \`pidof iperf3\`"
 	show_sleep 2
 	#echo $iperf3_output
-	sender_bitrate=$(echo $iperf3_output | awk '{print $1}')	# In Mbits/sec
+	sender_bitrate=$(echo $iperf3_output | awk '{print $1}') # In Mbits/sec
 	echo -e "Sender Bit rate \t=\t$sender_bitrate Mbits/sec"
-	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}')	# In Mbits/sec
+	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}') # In Mbits/sec
 	echo -e "Receiver Bit rate\t=\t$receiver_bitrate Mbits/sec"
 	receiver_bitrate=$(echo $receiver_bitrate | awk -F . '{print $1}')
-	
+
 	#setting to default mode in target client
-	echo "/usr/share/simpleconfig/setup.sh $default_mode" > /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $default_mode" >/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 
 	#setting to default mode in target server
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" >/dev/null
 	show_sleep 60
 
 	#cleaning in ubuntu host, target server and client
-	rm /tmp/temp.cmd #/tmp/temp1.cmd
-	$ssh_silent_cmd "rm /tmp/temp.cmd" # /tmp/temp1.cmd"
+	rm /tmp/temp.cmd                                         #/tmp/temp1.cmd
+	$ssh_silent_cmd "rm /tmp/temp.cmd"                       # /tmp/temp1.cmd"
 	$ssh_silent_cmd "ssh root@$client_ip "rm /tmp/temp.cmd"" # /tmp/temp1.cmd""
 	echo "End of $FUNCNAME"
 	if [ "$receiver_bitrate" -ge "$threshold_bitrate" ]; then
@@ -806,41 +801,41 @@ TEST_00019() {
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	channel=15     #Channel 15 is 912MHz
-	bandwidth=20   #20MHz
-	threshold_bitrate=5     # Mbits/sec
+	channel=15          #Channel 15 is 912MHz
+	bandwidth=20        #20MHz
+	threshold_bitrate=5 # Mbits/sec
 	mode="wds_client"
 	client_mode="wds_ap"
 	server_ip=$($ssh_silent_cmd "ifconfig br-wan" | awk '{print $2}' | head -n 2 | tail -1 | awk -F : '{print $2}')
-	echo "echo \"setting $client_mode mode\"" > /tmp/temp.cmd
-	echo "/usr/share/simpleconfig/setup.sh $client_mode" >> /tmp/temp.cmd
-	echo "echo \"waiting for 60 seconds\"" >> /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
-	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.channel=$channel" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.chanbw=$bandwidth" >> /tmp/temp.cmd
-	echo "uci commit" >> /tmp/temp.cmd
-	echo "wifi" >> /tmp/temp.cmd
-	echo "sleep 10" >> /tmp/temp.cmd
+	echo "echo \"setting $client_mode mode\"" >/tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $client_mode" >>/tmp/temp.cmd
+	echo "echo \"waiting for 60 seconds\"" >>/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
+	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.channel=$channel" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.chanbw=$bandwidth" >>/tmp/temp.cmd
+	echo "uci commit" >>/tmp/temp.cmd
+	echo "wifi" >>/tmp/temp.cmd
+	echo "sleep 10" >>/tmp/temp.cmd
 	#echo "/tmp/temp.cmd &" > /tmp/temp1.cmd
 	chmod 777 /tmp/temp.cmd #/tmp/temp1.cmd
 	#scp /tmp/temp.cmd /tmp/temp1.cmd root@$default_target_ip:/tmp/
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	#$ssh_silent_cmd "scp /tmp/temp.cmd /tmp/temp1.cmd root@$client_ip:/tmp/"
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	
+
 	echo "setting $client_mode mode in $client_ip"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 	echo "setting $mode mode in $server_ip"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" >/dev/null
 	show_sleep 60
 	$ssh_silent_cmd "uci set wireless.radio0.channel=$channel"
 	$ssh_silent_cmd "uci set wireless.radio0.chanbw=$bandwidth"
 	$ssh_silent_cmd "uci commit wireless"
 	$ssh_silent_cmd "wifi"
 	show_sleep 30
-	
+
 	echo -e "iperf3 server ip is $server_ip"
 	$ssh_silent_cmd "iperf3 -s -D"
 	show_sleep 2
@@ -856,27 +851,27 @@ TEST_00019() {
 	$ssh_silent_cmd "kill -9 \`pidof iperf3\`"
 	show_sleep 2
 	#echo $iperf3_output
-	sender_bitrate=$(echo $iperf3_output | awk '{print $1}')	# In Mbits/sec
+	sender_bitrate=$(echo $iperf3_output | awk '{print $1}') # In Mbits/sec
 	echo -e "Sender Bit rate \t=\t$sender_bitrate Mbits/sec"
-	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}')	# In Mbits/sec
+	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}') # In Mbits/sec
 	echo -e "Receiver Bit rate\t=\t$receiver_bitrate Mbits/sec"
 	receiver_bitrate=$(echo $receiver_bitrate | awk -F . '{print $1}')
-	
+
 	#setting to default mode in target client
-	echo "/usr/share/simpleconfig/setup.sh $default_mode" > /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $default_mode" >/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 
 	#setting to default mode in target server
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" >/dev/null
 	show_sleep 60
 
 	#cleaning in ubuntu host, target server and client
-	rm /tmp/temp.cmd #/tmp/temp1.cmd
-	$ssh_silent_cmd "rm /tmp/temp.cmd" # /tmp/temp1.cmd"
+	rm /tmp/temp.cmd                                         #/tmp/temp1.cmd
+	$ssh_silent_cmd "rm /tmp/temp.cmd"                       # /tmp/temp1.cmd"
 	$ssh_silent_cmd "ssh root@$client_ip "rm /tmp/temp.cmd"" # /tmp/temp1.cmd""
 	echo "End of $FUNCNAME"
 	if [ "$receiver_bitrate" -ge "$threshold_bitrate" ]; then
@@ -921,34 +916,34 @@ TEST_00023() {
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	channel=15     #Channel 15 is 912MHz
-	bandwidth=20   #20MHz
-	threshold_bitrate=5     # Mbits/sec
+	channel=15          #Channel 15 is 912MHz
+	bandwidth=20        #20MHz
+	threshold_bitrate=5 # Mbits/sec
 	mode="dynamic_mesh"
 	client_mode="dynamic_mesh"
 	server_ip=$($ssh_silent_cmd "ifconfig br-wan" | awk '{print $2}' | head -n 2 | tail -1 | awk -F : '{print $2}')
-	echo "echo \"setting $client_mode mode\"" > /tmp/temp.cmd
-	echo "/usr/share/simpleconfig/setup.sh $client_mode" >> /tmp/temp.cmd
-	echo "echo \"waiting for 60 seconds\"" >> /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
-	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.channel=$channel" >> /tmp/temp.cmd
-	echo "uci set wireless.radio0.chanbw=$bandwidth" >> /tmp/temp.cmd
-	echo "uci commit" >> /tmp/temp.cmd
-	echo "wifi" >> /tmp/temp.cmd
-	echo "sleep 10" >> /tmp/temp.cmd
+	echo "echo \"setting $client_mode mode\"" >/tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $client_mode" >>/tmp/temp.cmd
+	echo "echo \"waiting for 60 seconds\"" >>/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
+	echo "echo \"setting $channel channel,bandwidth $bandwidth\"" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.channel=$channel" >>/tmp/temp.cmd
+	echo "uci set wireless.radio0.chanbw=$bandwidth" >>/tmp/temp.cmd
+	echo "uci commit" >>/tmp/temp.cmd
+	echo "wifi" >>/tmp/temp.cmd
+	echo "sleep 10" >>/tmp/temp.cmd
 	#echo "/tmp/temp.cmd &" > /tmp/temp1.cmd
 	chmod 777 /tmp/temp.cmd #/tmp/temp1.cmd
 	#scp /tmp/temp.cmd /tmp/temp1.cmd root@$default_target_ip:/tmp/
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	#$ssh_silent_cmd "scp /tmp/temp.cmd /tmp/temp1.cmd root@$client_ip:/tmp/"
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	
+
 	echo "setting $mode mode in $client_ip"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 	echo "setting $mode mode in $server_ip"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" >/dev/null
 	show_sleep 60
 	$ssh_silent_cmd "uci set wireless.radio0.channel=$channel"
 	$ssh_silent_cmd "uci set wireless.radio0.chanbw=$bandwidth"
@@ -961,7 +956,7 @@ TEST_00023() {
 		echo "$client_ip is not responsive"
 		return 0
 	fi
-	
+
 	echo -e "iperf3 server ip is $server_ip"
 	$ssh_silent_cmd "iperf3 -s -D"
 	$ssh_silent_cmd "iptables --insert zone_wan_input -j ACCEPT -p tcp --dport 5201 \
@@ -971,29 +966,29 @@ TEST_00023() {
 				  && iptables --delete zone_wan_input -j ACCEPT -p udp --dport 5201"
 	$ssh_silent_cmd "kill -9 \`pidof iperf3\`"
 	#echo $iperf3_output
-	sender_bitrate=$(echo $iperf3_output | awk '{print $1}')	# In Mbits/sec
+	sender_bitrate=$(echo $iperf3_output | awk '{print $1}') # In Mbits/sec
 	echo -e "Sender Bit rate \t=\t$sender_bitrate Mbits/sec"
-	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}')	# In Mbits/sec
+	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}') # In Mbits/sec
 	echo -e "Receiver Bit rate\t=\t$receiver_bitrate Mbits/sec"
 	receiver_bitrate=$(echo $receiver_bitrate | awk -F . '{print $1}')
-	
+
 	#setting to default mode in target client
 	echo "setting $default_mode mode in $client_ip"
-	echo "/usr/share/simpleconfig/setup.sh $default_mode" > /tmp/temp.cmd
-	echo "sleep 60" >> /tmp/temp.cmd
+	echo "/usr/share/simpleconfig/setup.sh $default_mode" >/tmp/temp.cmd
+	echo "sleep 60" >>/tmp/temp.cmd
 	scp /tmp/temp.cmd root@$default_target_ip:/tmp/
 	$ssh_silent_cmd "scp /tmp/temp.cmd root@$client_ip:/tmp/"
-	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &"	# this will take 70 seconds to execute in background. 
+	$ssh_silent_cmd "ssh root@$client_ip "/tmp/temp.cmd" &" # this will take 70 seconds to execute in background.
 	show_sleep 70
 
 	#setting to default mode in target server
 	echo "setting $default_mode mode in $server_ip"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $default_mode" >/dev/null
 	show_sleep 60
 
 	#cleaning in ubuntu host, target server and client
-	rm /tmp/temp.cmd #/tmp/temp1.cmd
-	$ssh_silent_cmd "rm /tmp/temp.cmd" # /tmp/temp1.cmd"
+	rm /tmp/temp.cmd                                         #/tmp/temp1.cmd
+	$ssh_silent_cmd "rm /tmp/temp.cmd"                       # /tmp/temp1.cmd"
 	$ssh_silent_cmd "ssh root@$client_ip "rm /tmp/temp.cmd"" # /tmp/temp1.cmd""
 	echo "End of $FUNCNAME"
 	if [ "$receiver_bitrate" -ge "$threshold_bitrate" ]; then
@@ -1035,14 +1030,13 @@ TEST_00025() {
 	fi
 	$ssh_silent_cmd "fes_model.sh set $model1"
 	$ssh_silent_cmd "reboot"
-	show_sleep 2	# takes 2 seconds for network interface to go down
-	
-	wait_time=200	# waiting time in seconds until reboot completes.
+	show_sleep 2 # takes 2 seconds for network interface to go down
+
+	wait_time=200 # waiting time in seconds until reboot completes.
 	echo "waiting for maximum of $wait_time seconds to boot:"
-	for (( c=1; c<=$wait_time; c++ ))
-	do
+	for ((c = 1; c <= $wait_time; c++)); do
 		resp=$(ping -c 1 -i 1 -w 1 $default_target_ip | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-		if [[ $resp  != "time" ]]; then
+		if [[ $resp != "time" ]]; then
 			echo -ne "$c/$wait_time\r"
 		else
 			boot_time="$c"
@@ -1062,12 +1056,12 @@ TEST_00025() {
 		echo "Failed to set model $model2_check into $model2"
 		return 0
 	fi
-	
-	channel=$default_channel		#Channel 15 is 912MHz, default is 12 i.e 915MHz
-	bandwidth=$default_bandwidth	#20MHz
-	threshold_bitrate=5	# Mbits/sec
+
+	channel=$default_channel     #Channel 15 is 912MHz, default is 12 i.e 915MHz
+	bandwidth=$default_bandwidth #20MHz
+	threshold_bitrate=5          # Mbits/sec
 	mode="mesh"
-	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" > /dev/null
+	$ssh_silent_cmd "/usr/share/simpleconfig/setup.sh $mode" >/dev/null
 	show_sleep 60
 	$ssh_silent_cmd "uci set wireless.radio0.channel=$channel"
 	$ssh_silent_cmd "uci set wireless.radio0.chanbw=$bandwidth"
@@ -1084,24 +1078,23 @@ TEST_00025() {
 				  && iptables --delete zone_wan_input -j ACCEPT -p udp --dport 5201"
 	$ssh_silent_cmd "kill -9 \`pidof iperf3\`"
 	#echo $iperf3_output
-	sender_bitrate=$(echo $iperf3_output | awk '{print $1}')	# In Mbits/sec
+	sender_bitrate=$(echo $iperf3_output | awk '{print $1}') # In Mbits/sec
 	echo -e "Sender Bit rate \t=\t$sender_bitrate Mbits/sec"
-	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}')	# In Mbits/sec
+	receiver_bitrate=$(echo $iperf3_output | awk '{print $2}') # In Mbits/sec
 	echo -e "Receiver Bit rate\t=\t$receiver_bitrate Mbits/sec"
 	receiver_bitrate=$(echo $receiver_bitrate | awk -F . '{print $1}')
-	
+
 	$ssh_silent_cmd "ssh root@$client_ip "fes_model.sh set $default_model""
 	$ssh_silent_cmd "ssh root@$client_ip "reboot""
 	$ssh_silent_cmd "fes_model.sh set $default_model"
 	$ssh_silent_cmd "reboot"
-	show_sleep 2	# takes 2 seconds for network interface to go down
-	
-	wait_time=200	# waiting time in seconds until reboot completes.
+	show_sleep 2 # takes 2 seconds for network interface to go down
+
+	wait_time=200 # waiting time in seconds until reboot completes.
 	echo "waiting for maximum of $wait_time seconds to boot:"
-	for (( c=1; c<=$wait_time; c++ ))
-	do
+	for ((c = 1; c <= $wait_time; c++)); do
 		resp=$(ping -c 1 -i 1 -w 1 $default_target_ip | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-		if [[ $resp  != "time" ]]; then
+		if [[ $resp != "time" ]]; then
 			echo -ne "$c/$wait_time\r"
 		else
 			boot_time="$c"
@@ -1125,23 +1118,22 @@ TEST_00026() {
 	if [[ $? == 0 ]]; then
 		return 0
 	fi
-	threshold_boot_time=25	# extected boot time in seconds to pass the test
+	threshold_boot_time=25 # extected boot time in seconds to pass the test
 
 	resp=$(ping -c 1 -i 1 -w 1 $default_target_ip | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-	if [[ $resp  == "time" ]]; then
+	if [[ $resp == "time" ]]; then
 		echo "target is alive, rebooting to capture the boot time..."
 	else
 		echo "target is not reachable at $default_target_ip"
 		return 0
 	fi
 	$ssh_silent_cmd "reboot"
-	show_sleep 2	# takes 2 seconds for network interface to go down
-	wait_time=300	# waiting time in seconds until reboot completes.
+	show_sleep 2  # takes 2 seconds for network interface to go down
+	wait_time=300 # waiting time in seconds until reboot completes.
 	echo "waiting for maximum of $wait_time seconds to boot:"
-	for (( c=1; c<=$wait_time; c++ ))
-	do
+	for ((c = 1; c <= $wait_time; c++)); do
 		resp=$(ping -c 1 -i 1 -w 1 $default_target_ip | head -2 | tail -1 | awk '{print $7}' | awk -F = '{print $1}')
-		if [[ $resp  != "time" ]]; then
+		if [[ $resp != "time" ]]; then
 			echo -ne "$c/$wait_time\r"
 		else
 			boot_time="$c"
@@ -1159,7 +1151,7 @@ TEST_00026() {
 	else
 		return 0
 	fi
-	
+
 }
 
 TEST_00027() {
@@ -1320,9 +1312,9 @@ TEST_00032() {
 	#echo $new_value
 	echo "End of $FUNCNAME"
 	if [[ $new_value == $test_value ]]; then
-			return 1
+		return 1
 	else
-			return 0
+		return 0
 	fi
 }
 
@@ -1439,33 +1431,33 @@ TEST_00041() {
 }
 
 print_result() {
-	
+
 	if [[ $1 == $success ]]; then
-		echo "------------------------------------------------------" >> /tmp/test.log
-		echo -e "\t$test\t\t==>\tPASS" >> /tmp/test.log
-		echo "------------------------------------------------------" >> /tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
+		echo -e "\t$test\t\t==>\tPASS" >>/tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
 	elif [[ $1 == $fail ]]; then
-		echo "------------------------------------------------------" >> /tmp/test.log
-		echo -e "$test\t\t==>\tFAIL" >> /tmp/test.log
-		echo "------------------------------------------------------" >> /tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
+		echo -e "$test\t\t==>\tFAIL" >>/tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
 	elif [[ $1 == $not_available ]]; then
-		echo "------------------------------------------------------" >> /tmp/test.log
-		echo -e "\t$test\t\t==>\tNOT AVAILABLE" >> /tmp/test.log
-		echo "------------------------------------------------------" >> /tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
+		echo -e "\t$test\t\t==>\tNOT AVAILABLE" >>/tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
 	else
-		echo "------------------------------------------------------" >> /tmp/test.log
-		echo -e "\t$test\t\t==>\tUnknown return value" >> /tmp/test.log
-		echo "------------------------------------------------------" >> /tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
+		echo -e "\t$test\t\t==>\tUnknown return value" >>/tmp/test.log
+		echo "------------------------------------------------------" >>/tmp/test.log
 	fi
 }
 
-main(){
-	echo "Module test $FUNCNAME function started" > /tmp/test.log
+main() {
+	echo "Module test $FUNCNAME function started" >/tmp/test.log
 	total_tests=41
 	success=1
 	fail=0
 	not_available=2
-	
+
 	if [[ $1 != "" ]]; then
 		val=$(($1))
 		if [ "$val" -le "$total_tests" ]; then
@@ -1481,24 +1473,22 @@ main(){
 			print_result $ret
 		fi
 	else
-		for i in {1..9}
-		do
+		for i in {1..9}; do
 			TEST_0000$i
 			ret=$?
 			test="TEST_0000$i"
 			print_result $ret
 		done
-		for i in `seq 10 $total_tests`
-		do
+		for i in $(seq 10 $total_tests); do
 			TEST_000$i
 			ret=$?
 			test="TEST_0000$i"
 			print_result $ret
 		done
 	fi
-	echo "Module test $FUNCNAME function completed" >> /tmp/test.log
+	echo "Module test $FUNCNAME function completed" >>/tmp/test.log
 	cat /tmp/test.log
-#	rm /tmp/test.log
+	#	rm /tmp/test.log
 }
 main $1
 runtime_end=$(date +%s.%N)

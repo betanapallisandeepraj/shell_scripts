@@ -4,7 +4,7 @@
 progress_bar() {
     local progress=$1
     local total=$2
-    local length=30  # Length of the progress bar
+    local length=30 # Length of the progress bar
 
     # Calculate the percentage of progress
     local percent=$((progress * 100 / total))
@@ -14,10 +14,10 @@ progress_bar() {
 
     # Generate the progress bar string
     local bar="["
-    for ((i=0; i<num_chars; i++)); do
+    for ((i = 0; i < num_chars; i++)); do
         bar+='='
     done
-    for ((i=num_chars; i<length; i++)); do
+    for ((i = num_chars; i < length; i++)); do
         bar+=' '
     done
     bar+="]"
@@ -29,7 +29,7 @@ progress_bar() {
 # Example usage
 total_iterations=100
 
-for ((i=1; i<=total_iterations; i++)); do
+for ((i = 1; i <= total_iterations; i++)); do
     # Perform some task
     sleep 0.1
 
@@ -38,4 +38,3 @@ for ((i=1; i<=total_iterations; i++)); do
 done
 
 echo -e "\nTask completed!"
-

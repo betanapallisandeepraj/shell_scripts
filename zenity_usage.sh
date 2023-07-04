@@ -27,7 +27,7 @@ var= $( (
 
   echo 100
   echo "# Done!"
-  ) | zenity --title "Progress bar example" --progress --auto-kill)
+) | zenity --title "Progress bar example" --progress --auto-kill)
 echo $var
 
 var=$(zenity --info --width=400 --height=200 --text "This is a notification!")
@@ -43,26 +43,27 @@ echo $var
 #var=$(zenity --question --text "Are you sure you want to quit?" --no-wrap --ok-label "Yes" --cancel-label "No")
 #echo $var
 zenity --question --text="Do you want to answer stupid questions?"
-var=$? 
+var=$?
 if [[ $var == 0 ]]; then
-	echo "Yes"
+  echo "Yes"
 else
-	echo "No"
+  echo "No"
 fi
 
 var=$(zenity --password --username)
 case $? in
-         0)
-	 	echo "User Name: `echo $var | cut -d'|' -f1`"
-	 	echo "Password : `echo $var | cut -d'|' -f2`"
-		;;
-         1)
-                echo "Stop login.";;
-        -1)
-                echo "An unexpected error has occurred.";;
+0)
+  echo "User Name: $(echo $var | cut -d'|' -f1)"
+  echo "Password : $(echo $var | cut -d'|' -f2)"
+  ;;
+1)
+  echo "Stop login."
+  ;;
+-1)
+  echo "An unexpected error has occurred."
+  ;;
 esac
 echo $var
-
 
 var=$(zenity --color-selection --color red --show-palette)
 echo $var
@@ -76,4 +77,3 @@ var=$()
 echo $var
 var=$()
 echo $var
-
