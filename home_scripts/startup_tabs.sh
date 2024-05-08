@@ -46,7 +46,7 @@ ping_both_targets()
         fi
     done
 }
-ping_both_targets
+# ping_both_targets
 
 # USAGE:
 # open_tab <tab name> <command to execute after opening the tab>
@@ -59,8 +59,37 @@ open_tab()
     xdotool key Return
 }
 
+run_on_opened_tab()
+{
+    window_id=$(xdotool search --name $1)
+    xdotool windowactivate --sync "$window_id"
+    xdotool type --delay 50 "$2"
+    xdotool key Return
+}
+
 open_tab "target1" "ssh_target1"
 open_tab "target2" "ssh_target2"
+# open_tab "target2" "ssh_pc"
+
 open_tab "lede" "goto_lede"
 open_tab "lede_binary" "goto_lede;cd bin/targets/ar71xx/generic"
 open_tab "luci" "goto_lede;cd ../luci"
+
+# open_tab "lede_wearables" "goto_lede;cd  ../lede_wearables"
+# open_tab "lede_wearables" "goto_lede;cd  ../lede_wearables;cd bin/targets/ar71xx/generic"
+# open_tab "luci_wearables" "goto_lede;cd ../luci_wearables"
+
+# open_tab "lede_wlan1_2.4GHz" "goto_lede;cd  ../lede_wlan1_2.4GHz"
+# open_tab "lede_wlan1_2.4GHz" "goto_lede;cd  ../lede_wlan1_2.4GHz;cd bin/targets/ar71xx/generic"
+# open_tab "luci_wlan1_2.4GHz" "goto_lede;cd ../luci_wlan1_2.4GHz"
+
+open_tab "lede_max_throughput" "ssh_pc"
+run_on_opened_tab "lede_max_throughput" "cd  ~/dl_src/lede_max_throughput"
+open_tab "lede_max_throughput_bin" "ssh_pc"
+run_on_opened_tab "lede_max_throughput_bin" "cd  ~/dl_src/lede_max_throughput;cd bin/targets/ar71xx/generic"
+open_tab "luci_max_throughput" "ssh_pc"
+run_on_opened_tab "luci_max_throughput" "cd ~/dl_src/luci_max_throughput"
+
+# open_tab "target2" "ssh_pc"
+# open_tab "target2" "ssh_pc"
+# open_tab "target2" "ssh_pc"
