@@ -79,6 +79,12 @@ process_list() {
         IFS=$'\n' read -d '' -r -a sub_models_array <<< "$sub_models_list"
         for sub_model in "${sub_models_array[@]}"; do
             # echo "submodel: $sub_model"
+            if [ ! -f $($ssh_cmd "ls /usr/share/.doodlelabs/fes/$sub_model 2>/dev/null") ]; then
+                echo "/usr/share/.doodlelabs/fes/$sub_model file exist"
+            else
+                echo "Warning: /usr/share/.doodlelabs/fes/$sub_model file does not exist"
+                continue
+            fi
             # Find MD5 Crypt hash for a given string
             sub_model_hash=$($ssh_cmd "uhttpd -m \$(cat /usr/share/.doodlelabs/fes/$sub_model)")
             # echo "$sub_model_hash"
