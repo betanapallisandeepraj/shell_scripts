@@ -186,13 +186,13 @@ process_list() {
                         special_ch_assign=${special_ch_assign:-0}
                         min_shift=$(echo "$sub_model_data" | grep -w min_shift | awk -F = '{print $2}')
                         fes_freq_shift=$min_shift
-                        channel=0
                         for band_width in $chanbw_list; do
                             band_width=$((band_width/1000))
                             [ -n "$band_width" ] && current_bandwidth=$band_width
                             # echo "band=$sub_model,bw=$current_bandwidth"
                             $ssh_cmd "echo $current_bandwidth >/sys/kernel/debug/ieee80211/$phy/ath9k/chanbw"
                             sleep 0.1
+                            channel=0
                             while [ "$channel" -lt "$num_channels" ]; do
                                 frequency=$((channel*bandwidth_step))
                                 if [ "$special_ch_assign" = "2" ]; then
